@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Screenshots & Reports
+screenshots/
+reports/
+*.png
+
+# Logs
+*.log
+
+# Temp
+*.tmp
+.DS_Store
+Thumbs.db
+
+# playwright
+.pytest_cache/

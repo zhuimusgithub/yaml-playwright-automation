@@ -1,0 +1,66 @@
+version: "1.0"
+name: "批量提取演示"
+description: "演示循环 + 数据提取 + 条件分支"
+
+config:
+  browser:
+    type: chromium
+    headless: true
+    timeout: 30000
+  screenshot:
+    on_error: true
+    dir: "./screenshots"
+
+variables:
+  base_url: "https://news.ycombinator.com"
+
+tasks:
+  - id: open_site
+    name: "打开首页"
+    action: navigate
+    args:
+      url: "${base_url}"
+      wait_until: networkidle
+
+  - id: loop_search
+    name: "循环搜索关键词"
+    loop:
+      items:
+        - "/jobs"
+        - "/newest"
+        - "/ask"
+      variable: page
+      tasks:
+        - action: navigate
+          args:
+            url: "${base_url}${page}"
+          wait_for_navigation: true
+
+        - id: extract_titles
+          name: "提取标题"
+          action: extract_all
+          args:
+            selector: ".titleline > a"
+            var: "titles"
+            fields:
+              - selector: "a"
+                attr: "textContent"
+                field: "title"
+
+        - id: check_empty
+          name: "检查是否有内容"
+          if:
+            expression: "True"
+            then:
+              - action: screenshot
+                args:
+                  full_page: true
+            else:
+              - action: wait
+                args:
+                  ms: 500
+
+flow:
+  steps:
+    - task: open_site
+    - task: loop_search

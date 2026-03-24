@@ -1,0 +1,86 @@
+version: "1.0"
+name: "登录演示"
+description: "演示基础登录流程"
+
+config:
+  browser:
+    type: chromium
+    headless: true
+    timeout: 30000
+    viewport:
+      width: 1280
+      height: 720
+  retry:
+    max_attempts: 3
+    delay: 2000
+  screenshot:
+    on_error: true
+    on_success: false
+    dir: "./screenshots"
+
+variables:
+  base_url: "https://example.com"
+  test_username: "demo@example.com"
+  test_password: "demo1234"
+
+tasks:
+  - id: navigate_login
+    name: "打开登录页"
+    action: navigate
+    args:
+      url: "${base_url}/login"
+      wait_until: domcontentloaded
+    screenshot: true
+
+  - id: fill_username
+    name: "填写用户名"
+    action: fill
+    args:
+      selector: "#username"
+      value: "${test_username}"
+    wait: 500
+
+  - id: fill_password
+    name: "填写密码"
+    action: fill
+    args:
+      selector: "#password"
+      value: "${test_password}"
+    wait: 500
+
+  - id: click_submit
+    name: "点击登录"
+    action: click
+    args:
+      selector: "button[type=submit]"
+    wait_for_navigation: true
+    timeout: 10000
+    screenshot: true
+
+  - id: verify_success
+    name: "验证登录成功"
+    action: wait_for_selector
+    args:
+      selector: ".user-panel"
+    timeout: 15000
+
+  - id: extract_user_info
+    name: "提取用户信息"
+    action: extract
+    args:
+      selector: ".user-name"
+      attr: "textContent"
+      field: "logged_in_user"
+    store: true
+
+flow:
+  steps:
+    - task: navigate_login
+    - task: fill_username
+    - task: fill_password
+    - task: click_submit
+      retry:
+        max_attempts: 2
+        delay: 3000
+    - task: verify_success
+    - task: extract_user_info
